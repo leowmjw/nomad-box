@@ -106,6 +106,7 @@ resource "azurerm_virtual_machine" "foundation_node" {
     vhd_uri = "${var.foundation_storage_uri}/${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}.vhd"
     caching = "ReadWrite"
     create_option = "FromImage"
+    disk_size_gb = 8
   }
 
   os_profile {
