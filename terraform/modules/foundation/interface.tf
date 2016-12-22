@@ -30,3 +30,12 @@ variable "cidr_block" {
 variable "foundation_servers" {
   description = ""
 }
+
+variable "foundation_storage_uri" {
+  description = ""
+}
+
+output "pubip" {
+  value = [
+    "${azurerm_public_ip.foundation_pubip.ip_address}"]
+}
