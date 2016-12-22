@@ -9,6 +9,15 @@ resource "azurerm_virtual_network" "foundation_vnet" {
 
 }
 
+# Availability sets depending if it is clustered
+resource "azurerm_availability_set" "foundation_aset" {
+  # If single node; no need?
+  count = 1
+  name = "${var.organization}-${var.project}-${var.environment}-foundation-aset"
+  location = "${var.region}"
+  resource_group_name = "${var.resource_group}"
+}
+
 # Subnets as per defined
 resource "azurerm_subnet" "foundation_subnet" {
   count = "${var.foundation_servers}"
@@ -24,6 +33,11 @@ resource "azurerm_subnet" "foundation_subnet" {
   # network_security_group_id = ""
   # WAN routing next time?
   # route_table_id = ""
+
+  # In order to prevent something like: https://github.com/hashicorp/terraform/issues/7153
+  # Also will need to add dependency on security group once that is added here
+  #     IFF it appears >= TF 0.8.x ..
+  # depends_on = ["azurerm_virtual_network.foundation_vnet"]
 }
 
 # Public IP for main Bastion?
@@ -67,3 +81,53 @@ resource "azurerm_network_interface" "foundation_netif" {
   }
 
 }
+
+# Next; setup the virtual_machines
+resource "azurerm_virtual_machine" "foundation_node" {
+  count = "${var.foundation_servers}"
+  name = "${var.organization}-${var.project}-${var.environment}-foundation-node-${count.index + 1}"
+  location = "${var.region}"
+  resource_group_name = "${var.resource_group}"
+  network_interface_ids = [
+    "${element(azurerm_network_interface.foundation_netif.*.id, count.index)}"]
+  # vm_size = "Standard_A0"
+  vm_size = "Standard_F2"
+  delete_os_disk_on_termination = true
+
+  storage_image_reference {
+    publisher = "Canonical"
+    offer = "UbuntuServer"
+    sku = "16.04.0-LTS"
+    version = "latest"
+  }
+
+  storage_os_disk {
+    name = "${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}"
+    vhd_uri = "${var.foundation_storage_uri}/${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}.vhd"
+    caching = "ReadWrite"
+    create_option = "FromImage"
+  }
+
+  os_profile {
+    computer_name = "${var.organization}-${var.project}-${var.environment}-foundation-node-${count.index + 1}"
+    admin_username = "testadmin"
+    admin_password = "Password1234!"
+    custom_data = "${base64encode(file("cloud-init.txt"))}"
+  }
+
+  os_profile_linux_config {
+    disable_password_authentication = true
+    ssh_keys {
+      path = "/home/testadmin/.ssh/authorized_keys"
+      key_data = "${file("/Users/leow/.ssh/id_rsa.pub")}"
+    }
+  }
+
+  # For dev setup; don't even bother with Availability Sets
+  availability_set_id = "${(var.foundation_servers * 1 > 1) ? azurerm_availability_set.foundation_aset.id : ""}"
+
+  tags {
+    type = "Foundation"
+  }
+}
+

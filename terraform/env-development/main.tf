@@ -95,4 +95,6 @@ module "foundation" {
   cidr_block = "${var.cidr_block}"
 
   foundation_servers = "${var.foundation_servers}"
+
+  foundation_storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
 }
