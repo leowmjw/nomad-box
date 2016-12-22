@@ -54,7 +54,7 @@ resource "azurerm_network_interface" "foundation_netif" {
     public_ip_address_id = "${count.index == 0 ? azurerm_public_ip.foundation_pubip.id : ""}"
     # public_ip_address_id = "${count.index == 0 ? azurerm_public_ip.foundation_pubip.id : ''}"
     private_ip_address_allocation = "static"
-    private_ip_address = "${cidrhost(cidrsubnet(var.cidr_block, 8, count.index + 1), 1)}"
+    private_ip_address = "${cidrhost(cidrsubnet(var.cidr_block, 8, count.index + 1), 4)}"
   }
 
   # Primary node more liberal; the rest lock down?
