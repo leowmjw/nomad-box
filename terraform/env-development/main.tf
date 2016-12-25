@@ -126,7 +126,7 @@ module "director" {
   cidr_block = "${var.cidr_block}"
   virtual_network = "${module.foundation.vnet}"
 
-  num_servers = "${var.director_distribution["dev_count"]}"
+  num_servers = "${var.director_distribution["count"]}"
   storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
 }
 
