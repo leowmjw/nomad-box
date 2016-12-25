@@ -39,3 +39,7 @@ output "pubip" {
   value = [
     "${azurerm_public_ip.foundation_pubip.ip_address}"]
 }
+
+output "vnet" {
+  value = "${azurerm_virtual_network.foundation_vnet.name}"
+}

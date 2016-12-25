@@ -34,8 +34,8 @@ CONSUL_BIND_INTERFACE="eth0"
 CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
 
 # Start up the Consul agent
-/opt/consul/consul agent -server -ui -bootstrap-expect=3 -data-dir=/tmp/consul \
-  -config-dir=./consul.d -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
+/opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
+  -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
   -bind=${CONSUL_BIND_ADDRESS} &
 
 # Setup dnsmsq
@@ -87,17 +87,55 @@ cat > ./config.json <<EOF
 {
     "consul": {
         "address": "${CONSUL_CLIENT_ADDRESS}:8500"
+    },
+    "addresses": {
+        "http": "${CONSUL_CLIENT_ADDRESS}"
     }
 }
 EOF
 
-# Run both as server ONLY; taking consul config from above ...
-./nomad agent -server -bootstrap-expect=3 -data-dir=/tmp/nomad -config=./config.json &
+# Run both as server and client; taking consul config from above ...
+./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
 
-# Run Nomad-UI
-wget "https://github.com/iverberk/nomad-ui/releases/download/v0.4.0/nomad-ui-linux-amd64"
-chmod +x ./nomad-ui-linux-amd64
+# Setup Traefik (must run as root) ...
+# =====================================
+# Treafik operates in /opt
+mkdir -p /opt/traefik
+cd /opt/traefik
+# For use by traefik logging
+mkdir log
 
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
-./nomad-ui-linux-amd64 &
+# Get the binaries
+wget "https://github.com/containous/traefik/releases/download/v1.1.2/traefik_linux-amd64"
+chmod +x ./traefik_linux-amd64
 
+# Setup traefik TOML config; bind interface only to internal private IP?
+cat > ./traefik.toml <<EOF
+
+traefikLogsFile = "log/traefik.log"
+accessLogsFile = "log/access.log"
+
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[web]
+address = "${CONSUL_CLIENT_ADDRESS}:8080"
+
+[consulCatalog]
+constraints = ["tag==lolcats"]
+endpoint = "${CONSUL_CLIENT_ADDRESS}:8500"
+domain = "service.consul"
+prefix = "traefik"
+
+EOF
+
+# Run the traefik server; would be good to find out how to drop user permission
+./traefik_linux-amd64 &
+
+# Alternative: Setup Fabio (must run as root) ...
+# ============================================
+# Fabio operates in /opt
+# mkdir -p /opt/fabio
