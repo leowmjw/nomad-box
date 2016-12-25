@@ -53,6 +53,20 @@ variable "foundation_servers" {
   default = 1
 }
 
+variable "director_distribution" {
+  description = ""
+  type = "map"
+}
+
+variable "worker_distribution" {
+  description = ""
+  type = "map"
+  default = {
+    count = 1
+    instance_type = "Standard_A2"
+  }
+}
+
 provider "azurerm" {
   subscription_id = "${var.azure_subscription_id}"
   client_id = "${var.azure_client_id}"
@@ -97,4 +111,39 @@ module "foundation" {
   foundation_servers = "${var.foundation_servers}"
 
   foundation_storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+}
+
+module "director" {
+  source = "../modules/director"
+
+  resource_group = "${azurerm_resource_group.foundation.name}"
+
+  organization = "${var.organization}"
+  project = "${var.project}"
+  environment = "${var.environment}"
+  region = "${var.region}"
+
+  cidr_block = "${var.cidr_block}"
+  virtual_network = "${module.foundation.vnet}"
+
+  num_servers = "${var.director_distribution["dev_count"]}"
+  storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+}
+
+module "worker" {
+  source = "../modules/worker"
+
+  resource_group = "${azurerm_resource_group.foundation.name}"
+
+  organization = "${var.organization}"
+  project = "${var.project}"
+  environment = "${var.environment}"
+  region = "${var.region}"
+
+  cidr_block = "${var.cidr_block}"
+  virtual_network = "${module.foundation.vnet}"
+
+  num_servers = "${var.worker_distribution["count"]}"
+  instance_type = "${var.worker_distribution["instance_type"]}"
+  storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
 }
