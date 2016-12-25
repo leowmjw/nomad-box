@@ -48,7 +48,7 @@ resource "azurerm_network_interface" "worker_netif" {
 
   # Primary node more liberal; the rest lock down?
   # network_security_group_id = ""
-  internal_dns_name_label = "${var.organization}-${var.project}-${var.environment}-worker-node-subnet${count.index + 1}"
+  internal_dns_name_label = "${var.organization}-${var.project}-${var.environment}-worker-node-${count.index + 1}"
   enable_ip_forwarding = true
 
   tags {

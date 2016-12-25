@@ -32,6 +32,8 @@ resource "azurerm_subnet" "director_subnet" {
 
 # Public IP - Yes, since LB -> attach it to Cloudflare etc?
 resource "azurerm_public_ip" "director_pubip" {
+  count = "${var.num_servers}"
+  
   name = "${var.organization}-${var.project}-${var.environment}-director-pubip-${count.index + 1}"
   resource_group_name = "${var.resource_group}"
   location = "${var.region}"
@@ -49,12 +51,13 @@ resource "azurerm_network_interface" "director_netif" {
   ip_configuration {
     name = "ipconf-${count.index + 1}"
     subnet_id = "${element(azurerm_subnet.director_subnet.*.id, count.index)}"
+    public_ip_address_id = "${element(azurerm_public_ip.director_pubip.*.id, count.index)}"
     private_ip_address_allocation = "dynamic"
   }
 
   # Primary node more liberal; the rest lock down?
   # network_security_group_id = ""
-  internal_dns_name_label = "${var.organization}-${var.project}-${var.environment}-director-node-subnet${count.index + 1}"
+  internal_dns_name_label = "${var.organization}-${var.project}-${var.environment}-director-node-${count.index + 1}"
   enable_ip_forwarding = true
 
   tags {
