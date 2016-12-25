@@ -33,7 +33,7 @@ resource "azurerm_subnet" "director_subnet" {
 # Public IP - Yes, since LB -> attach it to Cloudflare etc?
 resource "azurerm_public_ip" "director_pubip" {
   count = "${var.num_servers}"
-  
+
   name = "${var.organization}-${var.project}-${var.environment}-director-pubip-${count.index + 1}"
   resource_group_name = "${var.resource_group}"
   location = "${var.region}"

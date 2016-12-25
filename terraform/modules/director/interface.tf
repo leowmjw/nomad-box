@@ -59,5 +59,10 @@ output "internal_ips" {
 
 output "public_ips" {
   value = [
-    "${azurerm_public_ip.director_pubip.*.public_ip_address}}"]
+    "${azurerm_public_ip.director_pubip.*.ip_address}"]
+}
+
+output "public_fqdn" {
+  value = [
+    "${azurerm_public_ip.director_pubip.*.fqdn}"]
 }
