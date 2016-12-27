@@ -1,72 +1,3 @@
-variable "azure_subscription_id" {
-  description = ""
-}
-
-variable "azure_client_id" {
-  description = ""
-}
-
-variable "azure_client_secret" {
-  description = ""
-}
-
-variable "azure_tenant_id" {
-  description = ""
-
-}
-
-variable "organization" {
-  description = ""
-
-}
-
-variable "project" {
-  description = ""
-
-}
-variable "environment" {
-  description = ""
-  default = "dev"
-}
-
-variable "region" {
-  description = ""
-  default = "South East Asia"
-}
-
-variable "cidr_block" {
-  description = ""
-  default = "10.0.0.0/16"
-}
-
-variable "key_name" {
-  description = ""
-}
-
-variable "domain_name_servers" {
-  description = ""
-  type = "list"
-}
-
-variable "foundation_servers" {
-  description = ""
-  default = 1
-}
-
-variable "director_distribution" {
-  description = ""
-  type = "map"
-}
-
-variable "worker_distribution" {
-  description = ""
-  type = "map"
-  default = {
-    count = 1
-    instance_type = "Standard_A2"
-  }
-}
-
 provider "azurerm" {
   subscription_id = "${var.azure_subscription_id}"
   client_id = "${var.azure_client_id}"
@@ -74,12 +5,23 @@ provider "azurerm" {
   tenant_id = "${var.azure_tenant_id}"
 }
 
-# Shared Resources Defined ...
+# Separate Resource Group so it is easier to see costing
 resource "azurerm_resource_group" "foundation" {
   name = "${var.organization}-${var.project}-${var.environment}-foundation"
   location = "${var.region}"
 }
 
+resource "azurerm_resource_group" "director" {
+  name = "${var.organization}-${var.project}-${var.environment}-director"
+  location = "${var.region}"
+}
+
+resource "azurerm_resource_group" "worker" {
+  name = "${var.organization}-${var.project}-${var.environment}-worker"
+  location = "${var.region}"
+}
+
+# Shared storage for all 3 type of nodes
 resource "azurerm_storage_account" "foundation" {
   name = "${var.organization}${var.project}${var.environment}foundationsa"
   resource_group_name = "${azurerm_resource_group.foundation.name}"
@@ -97,6 +39,7 @@ resource "azurerm_storage_container" "foundation" {
   container_access_type = "private"
 }
 
+# Foundation Nodes Defined ..
 module "foundation" {
   source = "../modules/foundation"
   resource_group = "${azurerm_resource_group.foundation.name}"
@@ -108,15 +51,19 @@ module "foundation" {
 
   cidr_block = "${var.cidr_block}"
 
-  foundation_servers = "${var.foundation_servers}"
+  num_servers = "${var.foundation_distribution["count"]}"
+  instance_type = "${var.foundation_distribution["instance_type"]}"
 
-  foundation_storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+  storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+
+  pub_key = "${var.pub_key}"
 }
 
+# Director Nodes Defined ..
 module "director" {
   source = "../modules/director"
 
-  resource_group = "${azurerm_resource_group.foundation.name}"
+  resource_group = "${azurerm_resource_group.director.name}"
 
   organization = "${var.organization}"
   project = "${var.project}"
@@ -127,13 +74,18 @@ module "director" {
   virtual_network = "${module.foundation.vnet}"
 
   num_servers = "${var.director_distribution["count"]}"
+  instance_type = "${var.director_distribution["instance_type"]}"
+
   storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+
+  pub_key = "${var.pub_key}"
 }
 
+# Worker Nodes Defined ..
 module "worker" {
   source = "../modules/worker"
 
-  resource_group = "${azurerm_resource_group.foundation.name}"
+  resource_group = "${azurerm_resource_group.worker.name}"
 
   organization = "${var.organization}"
   project = "${var.project}"
@@ -145,5 +97,8 @@ module "worker" {
 
   num_servers = "${var.worker_distribution["count"]}"
   instance_type = "${var.worker_distribution["instance_type"]}"
+
   storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+
+  pub_key = "${var.pub_key}"
 }

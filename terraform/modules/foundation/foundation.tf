@@ -20,7 +20,7 @@ resource "azurerm_availability_set" "foundation_aset" {
 
 # Subnets as per defined
 resource "azurerm_subnet" "foundation_subnet" {
-  count = "${var.foundation_servers}"
+  count = "${var.num_servers}"
 
   name = "${var.organization}-${var.project}-${var.environment}-foundation-subnet-${count.index + 1}"
   resource_group_name = "${var.resource_group}"
@@ -55,7 +55,7 @@ resource "azurerm_public_ip" "foundation_pubip" {
 
 # Network interfaces for each defined subnets
 resource "azurerm_network_interface" "foundation_netif" {
-  count = "${var.foundation_servers}"
+  count = "${var.num_servers}"
 
   name = "${var.organization}-${var.project}-${var.environment}-foundation-netif-${count.index + 1}"
   resource_group_name = "${var.resource_group}"
@@ -84,14 +84,13 @@ resource "azurerm_network_interface" "foundation_netif" {
 
 # Next; setup the virtual_machines
 resource "azurerm_virtual_machine" "foundation_node" {
-  count = "${var.foundation_servers}"
+  count = "${var.num_servers}"
   name = "${var.organization}-${var.project}-${var.environment}-foundation-node-${count.index + 1}"
   location = "${var.region}"
   resource_group_name = "${var.resource_group}"
   network_interface_ids = [
     "${element(azurerm_network_interface.foundation_netif.*.id, count.index)}"]
-  # vm_size = "Standard_A0"
-  vm_size = "Standard_F2"
+  vm_size = "${var.instance_type}"
   delete_os_disk_on_termination = true
 
   storage_image_reference {
@@ -103,11 +102,11 @@ resource "azurerm_virtual_machine" "foundation_node" {
 
   storage_os_disk {
     name = "${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}"
-    vhd_uri = "${var.foundation_storage_uri}/${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}.vhd"
+    vhd_uri = "${var.storage_uri}/${var.organization}-${var.project}-${var.environment}-foundation-osdisk-${count.index + 1}.vhd"
     caching = "ReadWrite"
     create_option = "FromImage"
     # Min size is 30GB :(
-    disk_size_gb = 60
+    # disk_size_gb = 60
   }
 
   os_profile {
@@ -121,12 +120,12 @@ resource "azurerm_virtual_machine" "foundation_node" {
     disable_password_authentication = true
     ssh_keys {
       path = "/home/testadmin/.ssh/authorized_keys"
-      key_data = "${file("/Users/leow/.ssh/id_rsa.pub")}"
+      key_data = "${file(var.pub_key)}"
     }
   }
 
   # For dev setup; don't even bother with Availability Sets
-  availability_set_id = "${(var.foundation_servers * 1 > 1) ? azurerm_availability_set.foundation_aset.id : ""}"
+  availability_set_id = "${(var.num_servers * 1 > 1) ? azurerm_availability_set.foundation_aset.id : ""}"
 
   tags {
     type = "Foundation"

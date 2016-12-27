@@ -13,13 +13,19 @@ key_name     = "dev"
 
 domain_name_servers = ["127.0.0.1"]
 
-foundation_servers = 1
-foundation_image_type = "Standard_A0"
-director_distribution = {
-  count = 1
-  instance_type = "Standard_A1"
-}
-worker_distribution = {
-  count = 1
+foundation_distribution = {
+  count = 3
   instance_type = "Standard_A2"
 }
+
+director_distribution = {
+  count = 1
+  instance_type = "Standard_F2"
+}
+
+worker_distribution = {
+  count = 1
+  instance_type = "Standard_F4"
+}
+
+pub_key = "~/.ssh/id_rsa.pub"

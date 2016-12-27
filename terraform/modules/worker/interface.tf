@@ -36,12 +36,15 @@ variable "num_servers" {
 }
 
 variable "instance_type" {
-  description = "Should be passed in from calling; based on env type?"
-  default = "Standard_F2"
+  description = "Worker Nodes; suggest type with more balanced memory/CPU; maybe A4?"
 }
 
 variable "storage_uri" {
   description = ""
+}
+
+variable "pub_key" {
+  description = "Full path to the SSH Public Key to be copied over into the Azure instance"
 }
 
 output "internal_ips" {

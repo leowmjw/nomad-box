@@ -96,12 +96,12 @@ resource "azurerm_virtual_machine" "worker_node" {
     disable_password_authentication = true
     ssh_keys {
       path = "/home/testadmin/.ssh/authorized_keys"
-      key_data = "${file("/Users/leow/.ssh/id_rsa.pub")}"
+      key_data = "${file(var.pub_key)}"
     }
   }
 
   # For dev setup; don't even bother with Availability Sets
-  availability_set_id = "${azurerm_availability_set.worker_aset.id}"
+  availability_set_id = "${(var.num_servers * 1 > 1) ? azurerm_availability_set.worker_aset.id : ""}"
 
   tags {
     type = "Worker"

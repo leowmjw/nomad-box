@@ -27,12 +27,20 @@ variable "cidr_block" {
   description = ""
 }
 
-variable "foundation_servers" {
+variable "num_servers" {
   description = ""
 }
 
-variable "foundation_storage_uri" {
+variable "instance_type" {
+  description = "Foundation Nodes; suggest start with Standard_A1 or A0 since will run 3"
+}
+
+variable "storage_uri" {
   description = ""
+}
+
+variable "pub_key" {
+  description = "Full path to the SSH Public Key to be copied over into the Azure instance"
 }
 
 output "pubip" {
