@@ -3,6 +3,10 @@
 # Worker nodes should be in the private subnet (start 100..)
 #############################################################################
 
+variable "foundation_resource_group" {
+  description = ""
+}
+
 variable "resource_group" {
   description = ""
 }
