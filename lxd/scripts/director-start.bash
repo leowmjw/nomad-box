@@ -1,0 +1,147 @@
+#!/bin/bash
+#
+
+# Get the basic packages
+apt-get update && apt-get upgrade -y && apt-get install -y wget unzip dnsmasq sysstat docker.io
+# Should probably get jq as well :P
+
+# Consul operates in /opt
+# ========================
+mkdir -p /opt/consul
+cd /opt/consul
+
+# Get the binaries
+wget "https://releases.hashicorp.com/consul/0.7.1/consul_0.7.1_linux_amd64.zip"
+unzip consul_0.7.1_linux_amd64.zip
+
+# Setup needed folders and start service; to be replaced in systemd
+mkdir ./consul.d
+
+# Extract the IP address from the determined interface
+CONSUL_CLIENT_INTERFACE="eth0"
+CONSUL_CLIENT_ADDRESS=$(ip -o -4 addr list $CONSUL_CLIENT_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
+# Use that address to setup the HTTP endpoint so that it is reachable from within Docker container
+cat > ./consul.d/config.json <<EOF
+{
+    "addresses": {
+        "http": "${CONSUL_CLIENT_ADDRESS}"
+    }
+}
+EOF
+
+# Extract the IP address from the determined interface
+CONSUL_BIND_INTERFACE="eth0"
+CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
+
+# Start up the Consul agent
+/opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
+  -retry-join=10.1.1.4 -retry-join=10.1.2.4 -retry-join=10.1.3.4 \
+  -bind=${CONSUL_BIND_ADDRESS} &
+
+
+# Setup dnsmsq
+# From: https://github.com/darron/kvexpress-demo/blob/c0bd1733f0ad78979a34242d5cfe9961b0c3cabd/ami-build/provision.sh#L42-L56
+# From: https://www.consul.io/docs/guides/forwarding.html
+# =======================================================
+# create the needed folders
+mkdir -p /var/log/dnsmasq/ && chmod 755 /var/log/dnsmasq
+
+# Setup config file for dnsmasq
+cat > /etc/dnsmasq.d/10-consul <<EOF
+# Enable forward lookup of the 'consul' domain:
+server=/consul/127.0.0.1#8600
+
+# Uncomment and modify as appropriate to enable reverse DNS lookups for
+# common netblocks found in RFC 1918, 5735, and 6598:
+rev-server=10.0.0.0/8,127.0.0.1#8600
+
+# Accept DNS queries only from hosts whose address is on a local subnet.
+local-service
+
+EOF
+
+cat > /etc/default/dnsmasq <<EOF
+DNSMASQ_OPTS="--log-facility=/var/log/dnsmasq/dnsmasq --local-ttl=10"
+ENABLED=1
+CONFIG_DIR=/etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new
+EOF
+
+# Start the service ...
+service dnsmasq restart
+
+
+# Setup Nomad (must run as root) ..
+# ====================================
+# Nomad operates in /opt
+mkdir -p /opt/nomad
+cd /opt/nomad
+
+# Get the binaries
+wget "https://releases.hashicorp.com/nomad/0.5.0/nomad_0.5.0_linux_amd64.zip"
+unzip nomad_0.5.0_linux_amd64.zip
+
+# Setup needed folders and start service; to be replaced in systemd
+mkdir ./jobs
+
+# Setup the pointing of consul to the agent running locally
+cat > ./config.json <<EOF
+{
+    "consul": {
+        "address": "${CONSUL_CLIENT_ADDRESS}:8500"
+    },
+    "advertise": {
+        "http": "${CONSUL_CLIENT_ADDRESS}",
+        "serf": "${CONSUL_CLIENT_ADDRESS}",
+        "rpc": "${CONSUL_CLIENT_ADDRESS}"
+   },
+   "client": {
+	"network_interface": "eth0"
+   }
+}
+EOF
+
+./nomad agent -client -servers=10.1.1.4,10.1.2.4,10.1.3.4 -data-dir=/tmp/nomad -config=./config.json &
+
+# Setup Traefik (must run as root) ...
+# =====================================
+# Treafik operates in /opt
+mkdir -p /opt/traefik
+cd /opt/traefik
+# For use by traefik logging
+mkdir log
+
+# Get the binaries
+wget "https://github.com/containous/traefik/releases/download/v1.1.2/traefik_linux-amd64"
+chmod +x ./traefik_linux-amd64
+
+# Setup traefik TOML config; bind interface only to internal private IP?
+cat > ./traefik.toml <<EOF
+
+traefikLogsFile = "log/traefik.log"
+accessLogsFile = "log/access.log"
+
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[web]
+address = "${CONSUL_CLIENT_ADDRESS}:8080"
+
+[consulCatalog]
+constraints = ["tag==lolcats"]
+endpoint = "${CONSUL_CLIENT_ADDRESS}:8500"
+domain = "service.consul"
+prefix = "traefik"
+
+EOF
+
+# Run the traefik server; would be good to find out how to drop user permission
+./traefik_linux-amd64 &
+
+# Alternative: Setup Fabio (must run as root) ...
+# ============================================
+# Fabio operates in /opt
+# mkdir -p /opt/fabio
+
