@@ -63,6 +63,7 @@ module "foundation" {
 module "director" {
   source = "../modules/director"
 
+  foundation_resource_group = "${azurerm_resource_group.foundation.name}"
   resource_group = "${azurerm_resource_group.director.name}"
 
   organization = "${var.organization}"
@@ -85,6 +86,7 @@ module "director" {
 module "worker" {
   source = "../modules/worker"
 
+  foundation_resource_group = "${azurerm_resource_group.foundation.name}"
   resource_group = "${azurerm_resource_group.worker.name}"
 
   organization = "${var.organization}"

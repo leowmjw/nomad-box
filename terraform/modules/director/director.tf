@@ -13,7 +13,7 @@ resource "azurerm_subnet" "director_subnet" {
   count = "${var.num_servers * 1 > 1 ? 3 : 1}"
 
   name = "${var.organization}-${var.project}-${var.environment}-director-subnet-${count.index + 1}"
-  resource_group_name = "${var.resource_group}"
+  resource_group_name = "${var.foundation_resource_group}"
 
   virtual_network_name = "${var.virtual_network}"
   # address_prefix = "${element(var.foundation_subnets, count.index)}"

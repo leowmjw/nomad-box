@@ -9,6 +9,10 @@ variable "node_type" {
   default = "director"
 }
 
+variable "foundation_resource_group" {
+  description = ""
+}
+
 variable "resource_group" {
   description = ""
 }
