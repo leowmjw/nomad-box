@@ -11,8 +11,8 @@ mkdir -p /opt/consul
 cd /opt/consul
 
 # Get the binaries
-wget "https://releases.hashicorp.com/consul/0.7.1/consul_0.7.1_linux_amd64.zip"
-unzip consul_0.7.1_linux_amd64.zip
+wget "https://releases.hashicorp.com/consul/0.7.2/consul_0.7.2_linux_amd64.zip"
+unzip consul_0.7.2_linux_amd64.zip
 
 # Setup needed folders and start service; to be replaced in systemd
 mkdir ./consul.d
@@ -76,8 +76,8 @@ mkdir -p /opt/nomad
 cd /opt/nomad
 
 # Get the binaries
-wget "https://releases.hashicorp.com/nomad/0.5.0/nomad_0.5.0_linux_amd64.zip"
-unzip nomad_0.5.0_linux_amd64.zip
+wget "https://releases.hashicorp.com/nomad/0.5.2/nomad_0.5.2_linux_amd64.zip"
+unzip nomad_0.5.2_linux_amd64.zip
 
 # Setup needed folders and start service; to be replaced in systemd
 mkdir ./jobs
@@ -95,9 +95,9 @@ EOF
 ./nomad agent -server -bootstrap-expect=3 -data-dir=/tmp/nomad -config=./config.json &
 
 # Run Nomad-UI
-wget "https://github.com/iverberk/nomad-ui/releases/download/v0.4.0/nomad-ui-linux-amd64"
-chmod +x ./nomad-ui-linux-amd64
+wget "https://github.com/jippi/hashi-ui/releases/download/v0.12.1/hashi-ui-linux-amd64"
+chmod +x ./hashi-ui-linux-amd64
 
 # With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
-./nomad-ui-linux-amd64 &
+./hashi-ui-linux-amd64 &
 
