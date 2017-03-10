@@ -7,3 +7,6 @@
 
 # Ignore modules folders etc..
 .terraform
+
+# Ignore the bin folder for now
+bin
