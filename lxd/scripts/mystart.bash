@@ -1,10 +1,11 @@
 #!/bin/bash
 #
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
 
 # Get the basic packages
-export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io
-# apt-get update && apt-get install -y unzip dnsmasq sysstat docker.io
-
+export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y wget unzip dnsmasq sysstat docker.io
 # Should probably get jq as well :P
 
 # Consul operates in /opt
@@ -36,9 +37,11 @@ CONSUL_BIND_INTERFACE="eth0"
 CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
 
 # Start up the Consul agent
-/opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
-  -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
-  -bind=${CONSUL_BIND_ADDRESS} &
+echo "Starting consul at ${CONSUL_CLIENT_ADDRESS} !!"
+
+# /opt/consul/consul agent -server -ui -bootstrap-expect=3 -data-dir=/tmp/consul \
+#   -config-dir=./consul.d -retry-join=10.1.1.4 -retry-join=10.1.2.4 -retry-join=10.1.3.4 \
+#  -bind=${CONSUL_BIND_ADDRESS} &
 
 # Setup dnsmsq
 # From: https://github.com/darron/kvexpress-demo/blob/c0bd1733f0ad78979a34242d5cfe9961b0c3cabd/ami-build/provision.sh#L42-L56
@@ -90,11 +93,22 @@ cat > ./config.json <<EOF
     "consul": {
         "address": "${CONSUL_CLIENT_ADDRESS}:8500"
     },
-    "addresses": {
+    "advertise": {
         "http": "${CONSUL_CLIENT_ADDRESS}"
-    }
+        "serf": "${CONSUL_CLIENT_ADDRESS}"
+        "rpc": "${CONSUL_CLIENT_ADDRESS}"
+   }
 }
 EOF
 
-# Run both as server and client; taking consul config from above ...
-./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
+# Run both as server ONLY; taking consul config from above ...
+# ./nomad agent -server -bootstrap-expect=3 -data-dir=/tmp/nomad -config=./config.json &
+
+# Run Nomad-UI
+wget "https://github.com/iverberk/nomad-ui/releases/download/v0.4.0/nomad-ui-linux-amd64"
+chmod +x ./nomad-ui-linux-amd64
+
+# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
+# ./nomad-ui-linux-amd64 &
+
+
