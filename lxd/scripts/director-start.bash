@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
 
 # Get the basic packages
 apt-get update && apt-get upgrade -y && apt-get install -y wget unzip dnsmasq sysstat docker.io
