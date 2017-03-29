@@ -1,10 +1,11 @@
 #!/bin/bash
 #
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
 
 # Get the basic packages
-export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io
-# apt-get update && apt-get install -y unzip dnsmasq sysstat docker.io
-
+apt-get update && apt-get upgrade -y && apt-get install -y wget unzip dnsmasq sysstat docker.io
 # Should probably get jq as well :P
 
 # Consul operates in /opt
@@ -37,8 +38,9 @@ CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk
 
 # Start up the Consul agent
 /opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
-  -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
+  -retry-join=10.1.1.4 -retry-join=10.1.2.4 -retry-join=10.1.3.4 \
   -bind=${CONSUL_BIND_ADDRESS} &
+
 
 # Setup dnsmsq
 # From: https://github.com/darron/kvexpress-demo/blob/c0bd1733f0ad78979a34242d5cfe9961b0c3cabd/ami-build/provision.sh#L42-L56
@@ -90,11 +92,59 @@ cat > ./config.json <<EOF
     "consul": {
         "address": "${CONSUL_CLIENT_ADDRESS}:8500"
     },
-    "addresses": {
-        "http": "${CONSUL_CLIENT_ADDRESS}"
-    }
+    "advertise": {
+        "http": "${CONSUL_CLIENT_ADDRESS}",
+        "serf": "${CONSUL_CLIENT_ADDRESS}",
+        "rpc": "${CONSUL_CLIENT_ADDRESS}"
+   },
+   "client": {
+	"network_interface": "eth0"
+   }
 }
 EOF
 
-# Run both as server and client; taking consul config from above ...
-./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
+./nomad agent -client -servers=10.1.1.4,10.1.2.4,10.1.3.4 -data-dir=/tmp/nomad -config=./config.json &
+
+# Setup Traefik (must run as root) ...
+# =====================================
+# Treafik operates in /opt
+mkdir -p /opt/traefik
+cd /opt/traefik
+# For use by traefik logging
+mkdir log
+
+# Get the binaries
+wget "https://github.com/containous/traefik/releases/download/v1.1.2/traefik_linux-amd64"
+chmod +x ./traefik_linux-amd64
+
+# Setup traefik TOML config; bind interface only to internal private IP?
+cat > ./traefik.toml <<EOF
+
+traefikLogsFile = "log/traefik.log"
+accessLogsFile = "log/access.log"
+
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[web]
+address = "${CONSUL_CLIENT_ADDRESS}:8080"
+
+[consulCatalog]
+constraints = ["tag==lolcats"]
+endpoint = "${CONSUL_CLIENT_ADDRESS}:8500"
+domain = "service.consul"
+prefix = "traefik"
+
+EOF
+
+# Run the traefik server; would be good to find out how to drop user permission
+./traefik_linux-amd64 &
+
+# Alternative: Setup Fabio (must run as root) ...
+# ============================================
+# Fabio operates in /opt
+# mkdir -p /opt/fabio
+

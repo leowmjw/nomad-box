@@ -1,0 +1,44 @@
+http://fluentd.local:8080, http://quote.local:8080, http://nodered.local:8080, http://whoami.local:8080 {
+
+	proxy /  13.76.188.215:80 {
+
+		policy least_conn
+		transparent
+		websocket
+		
+	}
+
+}
+
+http://traefik.local:1111 {
+
+	proxy / 13.76.188.215:8080 {
+
+		policy least_conn
+		transparent
+		websocket
+
+	}
+}
+
+http://consul.local:1111 {
+
+	proxy / 10.0.1.4:8500 10.0.2.4:8500 10.0.3.4:8500 {
+
+		policy least_conn
+		transparent
+		websocket
+
+	}
+}
+
+http://nomad.local:1111 {
+
+	proxy / 10.0.1.4:3000 10.0.2.4:3000 10.0.3.4:3000 {
+
+		policy least_conn
+		transparent
+		websocket
+
+	}
+}
