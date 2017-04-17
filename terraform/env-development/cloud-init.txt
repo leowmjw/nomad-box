@@ -1,6 +1,11 @@
 #!/bin/bash
 #
 
+# This should be filled in by TF template using the Makefile ENV
+NOMAD_BOX_VERSION_CONSUL=0.7.5
+NOMAD_BOX_VERSION_NOMAD=0.5.5
+NOMAD_BOX_VERSION_NOMAD_UI=0.12.0
+
 # Get the basic packages
 export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io
 # Should probably get jq as well :P
@@ -11,8 +16,8 @@ mkdir -p /opt/consul
 cd /opt/consul
 
 # Get the binaries
-wget "https://releases.hashicorp.com/consul/0.7.2/consul_0.7.2_linux_amd64.zip"
-unzip consul_0.7.2_linux_amd64.zip
+wget "https://releases.hashicorp.com/consul/${NOMAD_BOX_VERSION_CONSUL}/consul_${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip"
+unzip consul_${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip
 
 # Setup needed folders and start service; to be replaced in systemd
 mkdir ./consul.d
@@ -76,8 +81,8 @@ mkdir -p /opt/nomad
 cd /opt/nomad
 
 # Get the binaries
-wget "https://releases.hashicorp.com/nomad/0.5.2/nomad_0.5.2_linux_amd64.zip"
-unzip nomad_0.5.2_linux_amd64.zip
+wget "https://releases.hashicorp.com/nomad/${NOMAD_BOX_VERSION_NOMAD}/nomad_${NOMAD_BOX_VERSION_NOMAD}_linux_amd64.zip"
+unzip nomad_${NOMAD_BOX_VERSION_NOMAD}_linux_amd64.zip
 
 # Setup needed folders and start service; to be replaced in systemd
 mkdir ./jobs
@@ -95,7 +100,7 @@ EOF
 ./nomad agent -server -bootstrap-expect=3 -data-dir=/tmp/nomad -config=./config.json &
 
 # Run Nomad-UI
-wget "https://github.com/jippi/hashi-ui/releases/download/v0.12.1/hashi-ui-linux-amd64"
+wget "https://github.com/jippi/hashi-ui/releases/download/v${NOMAD_BOX_VERSION_NOMAD_UI}/hashi-ui-linux-amd64"
 chmod +x ./hashi-ui-linux-amd64
 
 # With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"

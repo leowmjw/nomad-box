@@ -1,10 +1,12 @@
-NOMAD_BOX_VERSION=v0.0.1
-NOMAD_BOX_VERSION_TERRAFORM=0.8.8
-NOMAD_BOX_VERSION_CONSUL=0.7.2
-NOMAD_BOX_VERSION_NOMAD=0.5.2
-NOMAD_BOX_VERSION_NOMAD_UI=v0.12.0
-NOMAD_BOX_VERSION_TRAEFIK=v0.x.y
+# Courtesy of: https://www.cmcrossroads.com/article/setting-makefile-variable-outside-makefile
+NOMAD_BOX_VERSION?=v0.0.1
+NOMAD_BOX_VERSION_TERRAFORM=0.9.2
+NOMAD_BOX_VERSION_CONSUL=0.7.5
+NOMAD_BOX_VERSION_NOMAD=0.5.5
+NOMAD_BOX_VERSION_NOMAD_UI=0.12.0
+NOMAD_BOX_VERSION_TRAEFIK=1.2.1
 NOMAD_BOX_VERSION_CADDY=v0.z.a
+NOMAD_BOX_ENV?=env-development
 NOMAD_BOX_VAGRANT=/Users/leow/OTTO/lxd-lab
 
 default: info
@@ -28,23 +30,23 @@ setup:
 	    unzip terraform_${NOMAD_BOX_VERSION_TERRAFORM}_darwin_amd64.zip
 
 info:
-	echo "Info ..."
+	echo "Nomad Box Version: ${NOMAD_BOX_VERSION}"
 
 plan:
 	echo "Planning .."
-	cd ./terraform/env-development && time ../../bin/terraform plan
+	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform plan
 
 apply:
 	echo "Executing plan .."
-	cd ./terraform/env-development && time ../../bin/terraform apply
+	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform apply
 
 refresh:
 	echo "Refreshing .."
-	cd ./terraform/env-development && time ../../bin/terraform refresh
+	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform refresh
 
 destroy:
 	echo "Removing infra .."
-	cd ./terraform/env-development && time ../../bin/terraform destroy
+	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform destroy
 
 local:
 	./bin/consul -dev && ./bin/nomad -dev 
@@ -58,7 +60,7 @@ cluster-up:
 tunnel-up:
 	echo "Tunnel Up .."
 	touch ~/.ssh/known_hosts && rm ~/.ssh/known_hosts
-	sh -c  "sshuttle -r testadmin@$(shell ./bin/terraform output -state=./terraform/env-development/terraform.tfstate bastion_pubip) 10.0.0.0/16"
+	sh -c  "sshuttle -r testadmin@$(shell ./bin/terraform output -state=./terraform/${NOMAD_BOX_ENV}/terraform.tfstate bastion_pubip) 10.0.0.0/16"
 
 proxy-up:
 	echo "Tunnel Up .."

@@ -75,6 +75,15 @@ variable "worker_distribution" {
   }
 }
 
+variable "experiment_distribution" {
+  description = ""
+  type = "map"
+  default = {
+    count = 1
+    instance_type = "Standard_A1"
+  }
+}
+
 variable "pub_key" {
   description = "Full path to the SSH Public Key to be copied over into the Azure instance"
 }

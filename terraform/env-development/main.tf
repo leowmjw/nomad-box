@@ -104,3 +104,26 @@ module "worker" {
 
   pub_key = "${var.pub_key}"
 }
+
+# Experiment Nodes Defined .. shares Resources with Director; sites within its namespace 10.0.42.x
+module "experiment" {
+  source = "../modules/experiment"
+
+  foundation_resource_group = "${azurerm_resource_group.foundation.name}"
+  resource_group = "${azurerm_resource_group.director.name}"
+
+  organization = "${var.organization}"
+  project = "${var.project}"
+  environment = "${var.environment}"
+  region = "${var.region}"
+
+  cidr_block = "${var.cidr_block}"
+  virtual_network = "${module.foundation.vnet}"
+
+  num_servers = "${var.experiment_distribution["count"]}"
+  instance_type = "${var.experiment_distribution["instance_type"]}"
+
+  storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
+
+  pub_key = "${var.pub_key}"
+}
