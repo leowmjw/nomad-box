@@ -8,7 +8,7 @@ resource "azurerm_availability_set" "worker_aset" {
   resource_group_name = "${var.resource_group}"
 }
 
-# Subnets as per defined; Directors start at xx.xx.50.yy
+# Subnets as per defined; Directors start at xx.xx.100.yy
 resource "azurerm_subnet" "worker_subnet" {
   count = "${var.num_servers * 1 > 1 ? 3 : 1}"
 
