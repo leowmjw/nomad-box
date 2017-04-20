@@ -1,9 +1,9 @@
 # Courtesy of: https://www.cmcrossroads.com/article/setting-makefile-variable-outside-makefile
 NOMAD_BOX_VERSION?=v0.0.1
-NOMAD_BOX_VERSION_TERRAFORM=0.9.2
-NOMAD_BOX_VERSION_CONSUL=0.7.5
-NOMAD_BOX_VERSION_NOMAD=0.5.5
-NOMAD_BOX_VERSION_NOMAD_UI=0.12.0
+NOMAD_BOX_VERSION_TERRAFORM=0.9.3
+NOMAD_BOX_VERSION_CONSUL=0.8.1
+NOMAD_BOX_VERSION_NOMAD=0.5.6
+NOMAD_BOX_VERSION_NOMAD_UI=0.13.4
 NOMAD_BOX_VERSION_TRAEFIK=1.2.1
 NOMAD_BOX_VERSION_CADDY=v0.z.a
 NOMAD_BOX_ENV?=env-development
@@ -28,6 +28,9 @@ setup:
 	cd bin && touch terraform && rm terraform* && \
 	    curl -O "https://releases.hashicorp.com/terraform/${NOMAD_BOX_VERSION_TERRAFORM}/terraform_${NOMAD_BOX_VERSION_TERRAFORM}_darwin_amd64.zip" && \
 	    unzip terraform_${NOMAD_BOX_VERSION_TERRAFORM}_darwin_amd64.zip
+
+	echo "Setup the proper modules .."
+	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform get -update
 
 info:
 	echo "Nomad Box Version: ${NOMAD_BOX_VERSION}"
