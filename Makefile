@@ -1,10 +1,10 @@
 # Courtesy of: https://www.cmcrossroads.com/article/setting-makefile-variable-outside-makefile
 NOMAD_BOX_VERSION?=v0.0.1
-NOMAD_BOX_VERSION_TERRAFORM=0.9.3
+NOMAD_BOX_VERSION_TERRAFORM=0.9.4
 NOMAD_BOX_VERSION_CONSUL=0.8.1
 NOMAD_BOX_VERSION_NOMAD=0.5.6
 NOMAD_BOX_VERSION_NOMAD_UI=0.13.4
-NOMAD_BOX_VERSION_TRAEFIK=1.2.1
+NOMAD_BOX_VERSION_TRAEFIK=1.2.3
 NOMAD_BOX_VERSION_CADDY=v0.z.a
 NOMAD_BOX_ENV?=env-development
 NOMAD_BOX_VAGRANT=/Users/leow/OTTO/lxd-lab
@@ -59,6 +59,12 @@ vagrant-up:
 
 cluster-up:
 	echo "Cluster Up.."
+	cd ./laptop/scripts && ./init.sh
+
+cluster-down:
+	echo "Cluster Down.."
+	# To be moved to maybe a terminating script?
+	kill `pgrep nomad` && kill `pgrep node` && sudo kill `pgrep caddy`
 
 tunnel-up:
 	echo "Tunnel Up .."
@@ -79,9 +85,6 @@ proxy-down:
 
 tunnel-down:
 	echo "Tunnel Down .."
-
-cluster-down:
-	echo "Cluster Down.."
 
 vagrant-down:
 	echo "Vagrant Down .."

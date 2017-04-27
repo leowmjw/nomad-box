@@ -1,6 +1,6 @@
-http://fluentd.local:8080, http://quote.local:8080, http://nodered.local:8080, http://whoami.local:8080 {
+http://fluentd.local:80, http://quote.local:80, http://nodered.local:80, http://whoami.local:80 {
 
-	proxy /  13.76.188.215:80 {
+	proxy /  10.0.51.4:80 10.0.52.4:80 {
 
 		policy least_conn
 		transparent
@@ -10,9 +10,9 @@ http://fluentd.local:8080, http://quote.local:8080, http://nodered.local:8080, h
 
 }
 
-http://traefik.local:1111 {
+http://traefik.local:80 {
 
-	proxy / 13.76.188.215:8080 {
+	proxy / 10.0.51.4:8080 10.0.52.4:8080 {
 
 		policy least_conn
 		transparent
@@ -21,7 +21,7 @@ http://traefik.local:1111 {
 	}
 }
 
-http://consul.local:1111 {
+http://consul.local:80 {
 
 	proxy / 10.0.1.4:8500 10.0.2.4:8500 10.0.3.4:8500 {
 
@@ -32,7 +32,7 @@ http://consul.local:1111 {
 	}
 }
 
-http://nomad.local:1111 {
+http://nomad.local:80 {
 
 	proxy / 10.0.1.4:3000 10.0.2.4:3000 10.0.3.4:3000 {
 

@@ -8,15 +8,18 @@ NOMAD_BOX_VERSION_NOMAD=0.5.6
 # Setup the needed repos for BedrockDB + others ..
 # START BedrockDB
 # Add the Bedrock repo to apt sources for your distro:
-sudo wget -O /etc/apt/sources.list.d/bedrock.list https://apt.bedrockdb.com/ubuntu/dists/$(lsb_release -cs)/bedrock.list
-
-# Add the Bedrock repo key:
+wget -O /etc/apt/sources.list.d/bedrock.list https://apt.bedrockdb.com/ubuntu/dists/$(lsb_release -cs)/bedrock.list
 wget -O - https://apt.bedrockdb.com/bedrock.gpg | sudo apt-key add -
 # END BerdockDB
 
+# Add the Microsoft needed info
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | sudo tee /etc/apt/sources.list.d/mssql-server.list
+# END MSSQL 2017 for Linux
+
 # Get the basic packages
 export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && \
-    apt-get install -y unzip dnsmasq sysstat docker.io bedrock jq
+    apt-get install -y unzip dnsmasq sysstat docker.io bedrock jq mssql-server
 
 # Consul operates in /opt
 # ========================
@@ -107,5 +110,10 @@ cat > ./config.json <<EOF
 }
 EOF
 
-# Run both as server and client; taking consul config from above ...
-./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
+# Run both as client; taking consul config from above ...
+# TODO: Pass in tags into meta perhaps ..; for now workers tagged as "primary", can be used to constrain
+./nomad agent -node-class=primary -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
+
+# Setup installation of th latest MSSQL 2017 for Linux .. neat!
+SA_PASSWORD="TestAdmin123456" /opt/mssql/bin/mssql-conf setup accept-eula
+

@@ -40,10 +40,10 @@ job "iot" {
   #
   #     https://www.nomadproject.io/docs/job-specification/constraint.html
   #
-  # constraint {
-  #   attribute = "${attr.kernel.name}"
-  #   value     = "linux"
-  # }
+  constraint {
+    attribute = "${attr.kernel.name}"
+    value     = "linux"
+  }
 
   # The "update" stanza specifies the job update strategy. The update strategy
   # is used to control things like rolling upgrades. If omitted, rolling

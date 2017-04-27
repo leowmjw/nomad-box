@@ -35,11 +35,11 @@ job "win-db" {
       }
 
       env {
-        "Data:DefaultConnection:ConnectionString" = "Server=10.0.2.5,1455;Database=MusicStore;User Id=sa;Password=Passw0rd;MultipleActiveResultSets=True"
+        "Data:DefaultConnection:ConnectionString" = "Server=10.0.66.4,1455;Database=MusicStore;User Id=sa;Password=Passw0rd;MultipleActiveResultSets=True"
       }
 
       resources {
-        cpu    = 800 # 500 MHz
+        cpu    = 300 # 500 MHz
         memory = 500 # 256MB
         network {
           mbits = 3
@@ -52,7 +52,7 @@ job "win-db" {
         tags = [
                  "monitor", 
                  "traefik.tags=lolcats",
-		 "traefik.frontend.rule=Host:store.10.0.3.4.xip.io"
+		 "traefik.frontend.rule=Host:store.10.0.66.4.xip.io"
                 ]
         port = "web"
       }
@@ -64,7 +64,7 @@ job "win-db" {
       # run the task.
       driver = "docker"
       config {
-        image = "microsoft/mssql-server-2016-express-windows"
+	image = "microsoft/mssql-server-windows-express"
         port_map {
           db = 1433 
         }
@@ -74,7 +74,7 @@ job "win-db" {
 	"sa_password" = "Passw0rd"
       }
       resources {
-        cpu    = 2500 # 500 MHz
+        cpu    = 500 # 500 MHz
         memory = 1024 # 256MB
         network {
           mbits = 10

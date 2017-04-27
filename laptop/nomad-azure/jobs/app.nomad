@@ -40,10 +40,10 @@ job "example-app" {
   #
   #     https://www.nomadproject.io/docs/job-specification/constraint.html
   #
-  # constraint {
-  #   attribute = "${attr.kernel.name}"
-  #   value     = "linux"
-  # }
+  constraint {
+     attribute = "${attr.kernel.name}"
+     value     = "linux"
+  }
 
   # The "update" stanza specifies the job update strategy. The update strategy
   # is used to control things like rolling upgrades. If omitted, rolling
@@ -78,7 +78,7 @@ job "example-app" {
     # The "count" parameter specifies the number of the task groups that should
     # be running under this group. This value must be non-negative and defaults
     # to 1.
-    count = 3
+    count = 6
 
     # The "restart" stanza configures a group's behavior on task failure. If
     # left unspecified, a default restart policy is used based on the job type.
@@ -224,7 +224,7 @@ job "example-app" {
 
           tags = [
 		   "urlprefix-quote.10.0.51.4.xip.io/",
-		   "traefik.frontend.rule=Host:quote.10.1.51.181.xip.io",
+		   "traefik.frontend.rule=Host:quote.local",
 		   "traefik.tags=red,lolcats",
 		   "global", 
 		   "app"

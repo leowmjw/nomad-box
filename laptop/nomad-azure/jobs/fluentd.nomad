@@ -40,10 +40,10 @@ job "monitoring" {
   #
   #     https://www.nomadproject.io/docs/job-specification/constraint.html
   #
-  # constraint {
-  #   attribute = "${attr.kernel.name}"
-  #   value     = "linux"
-  # }
+  constraint {
+    attribute = "${attr.kernel.name}"
+    value     = "linux"
+  }
 
   # The "update" stanza specifies the job update strategy. The update strategy
   # is used to control things like rolling upgrades. If omitted, rolling
@@ -78,7 +78,7 @@ job "monitoring" {
     # The "count" parameter specifies the number of the task groups that should
     # be running under this group. This value must be non-negative and defaults
     # to 1.
-    count = 1
+    count = 0
 
     # The "restart" stanza configures a group's behavior on task failure. If
     # left unspecified, a default restart policy is used based on the job type.

@@ -1,12 +1,16 @@
 job "whoami" {
   datacenters = ["dc1"]
   type = "service"
+  constraint {
+    attribute = "${attr.kernel.name}"
+    value     = "linux"
+  }
   update {
     stagger = "10s"
     max_parallel = 1
   }
   group "identity" {
-    count = 2
+    count = 1
     restart {
       attempts = 10
       interval = "5m"
@@ -41,7 +45,7 @@ job "whoami" {
         tags = [
 		"traefik.tags=blue,lolcats",
 		"urlprefix-whoami.10.0.51.4.xip.io/whoami",
-		"traefik.frontend.rule=Host:whoami.10.1.51.181.xip.io", 
+		"traefik.frontend.rule=Host:whoami.local", 
 		"traefik.frontend.entryPoints=http"
 	]
         port = "http"

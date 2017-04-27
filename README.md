@@ -159,3 +159,7 @@ Destroy complete! Resources: 4 destroyed.
 - konterraform - https://github.com/AppGyver/konterraform
 - Turbo (great examples of multi-region clusters) https://github.com/jonmorehouse/turbo
 - CoreOS Tectonic: https://github.com/coreos/tectonic-installer
+
+
+[login]: https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli
+
