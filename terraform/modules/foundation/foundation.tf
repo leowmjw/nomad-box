@@ -93,6 +93,10 @@ resource "azurerm_virtual_machine" "foundation_node" {
   vm_size = "${var.instance_type}"
   delete_os_disk_on_termination = true
 
+  lifecycle {
+    create_before_destroy = "true"
+  }
+
   storage_image_reference {
     publisher = "Canonical"
     offer = "UbuntuServer"
@@ -113,7 +117,7 @@ resource "azurerm_virtual_machine" "foundation_node" {
     computer_name = "${var.organization}-${var.project}-${var.environment}-foundation-node-${count.index + 1}"
     admin_username = "testadmin"
     admin_password = "Password1234!"
-    custom_data = "${base64encode(file("cloud-init.txt"))}"
+    custom_data = "${base64encode(var.cloudinit_content)}"
   }
 
   os_profile_linux_config {

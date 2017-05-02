@@ -69,7 +69,7 @@ module "foundation" {
   storage_uri = "${azurerm_storage_account.foundation.primary_blob_endpoint}${azurerm_storage_container.foundation.name}"
 
   pub_key = "${var.pub_key}"
-
+ 
   cloudinit_content = "${data.template_file.foundation.rendered}"
 }
 

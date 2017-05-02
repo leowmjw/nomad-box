@@ -7,6 +7,7 @@ NOMAD_BOX_VERSION_NOMAD_UI=0.13.4
 NOMAD_BOX_VERSION_TRAEFIK=1.2.3
 NOMAD_BOX_VERSION_CADDY=v0.z.a
 NOMAD_BOX_ENV?=env-development
+NOMAD_BOX_NET?="10.0.0.0/16"
 NOMAD_BOX_VAGRANT=/Users/leow/OTTO/lxd-lab
 
 default: info
@@ -31,6 +32,9 @@ setup:
 
 	echo "Setup the proper modules .."
 	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform get -update
+
+deps:
+	curl -L https://aka.ms/InstallAzureCli | bash
 
 info:
 	echo "Nomad Box Version: ${NOMAD_BOX_VERSION}"
@@ -69,7 +73,7 @@ cluster-down:
 tunnel-up:
 	echo "Tunnel Up .."
 	touch ~/.ssh/known_hosts && rm ~/.ssh/known_hosts
-	sh -c  "sshuttle -r testadmin@$(shell ./bin/terraform output -state=./terraform/${NOMAD_BOX_ENV}/terraform.tfstate bastion_pubip) 10.0.0.0/16"
+	sh -c  "sshuttle -vH -r testadmin@$(shell ./bin/terraform output -state=./terraform/${NOMAD_BOX_ENV}/terraform.tfstate bastion_pubip) ${NOMAD_BOX_NET}"
 
 proxy-up:
 	echo "Tunnel Up .."
