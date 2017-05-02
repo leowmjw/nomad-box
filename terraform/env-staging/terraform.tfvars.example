@@ -1,0 +1,31 @@
+azure_subscription_id = "<<SUBID>>"
+azure_client_id = "<<CLIENTID>>"
+azure_client_secret = <<CLIENTSECRET
+azure_tenant_id = "<<TENANT>ID>"
+
+
+organization = "acme"
+project      = "nomad"
+environment  = "dev"
+region       = "South East Asia"
+cidr_block   = "10.8.0.0/16"
+key_name     = "dev"
+
+domain_name_servers = ["127.0.0.1"]
+
+foundation_distribution = {
+  count = 3
+  instance_type = "Standard_A2"
+}
+
+director_distribution = {
+  count = 1
+  instance_type = "Standard_F2"
+}
+
+worker_distribution = {
+  count = 1
+  instance_type = "Standard_F4"
+}
+
+pub_key = "~/.ssh/id_rsa.pub"

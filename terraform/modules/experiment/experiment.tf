@@ -116,15 +116,13 @@ resource "azurerm_virtual_machine" "experiment_node" {
     type = "experiment"
   }
 
-
   # Provision by copying over the files neededfor LXD
   # NExt time execute it once find out the correct steps??
 
-  /* Skip this; run it within the bastion ..
+  /* Skip this; run it within the bastion .. */
   provisioner "file" {
     connection {
-      bastion_host = "52.187.29.183"
-      bastion_port = "22"
+      host = "${element(azurerm_network_interface.experiment_netif.*.private_ip_address, count.index)}"
       user = "testadmin"
       # private_key = "${file("/tmp/ssl.key")}"
       agent = "true"

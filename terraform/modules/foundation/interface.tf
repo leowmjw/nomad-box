@@ -43,6 +43,10 @@ variable "pub_key" {
   description = "Full path to the SSH Public Key to be copied over into the Azure instance"
 }
 
+variable "cloudinit_content" {
+  description = "Rendered content from base template used to cloudinit the node"
+}
+
 output "pubip" {
   value = [
     "${azurerm_public_ip.foundation_pubip.ip_address}"]
