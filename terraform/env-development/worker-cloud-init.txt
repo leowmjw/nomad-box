@@ -18,8 +18,12 @@ curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | sudo
 # END MSSQL 2017 for Linux
 
 # Get the basic packages
+# export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && \
+#    apt-get install -y unzip dnsmasq sysstat docker.io bedrock jq mssql-server
+
+# Leave out Bedrock for now; optional SW should be parameterized; or as part of Packer/templatized
 export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && \
-    apt-get install -y unzip dnsmasq sysstat docker.io bedrock jq mssql-server
+    apt-get install -y unzip dnsmasq sysstat docker.io docker-compose jq mssql-server
 
 # Consul operates in /opt
 # ========================
