@@ -1,31 +1,41 @@
 azure_subscription_id = "<<SUBID>>"
 azure_client_id = "<<CLIENTID>>"
-azure_client_secret = <<CLIENTSECRET
+azure_client_secret = "<<CLIENTSECRET>>"
 azure_tenant_id = "<<TENANT>ID>"
 
 
 organization = "acme"
 project      = "nomad"
-environment  = "dev"
-region       = "South East Asia"
-cidr_block   = "10.8.0.0/16"
-key_name     = "dev"
+# environment  = "dev"
+# region       = "South East Asia"
+# cidr_block   = "10.10.0.0/16"
+# Above can be set; defaults to "dev", "southeastasia", "10.0.0.0/16"
 
-domain_name_servers = ["127.0.0.1"]
+# Available images
+# A - Standard_A0, Standard_A1, Standard_A2
+# DS2 - Standard_DS2_v2_Promo, Standard_DS4_v2_Promo
+# F - Standard_F2, Standard_F4
 
 foundation_distribution = {
-  count = 3
-  instance_type = "Standard_A2"
+  count = 1
+  instance_type = "Standard_DS2_v2_Promo"
 }
 
 director_distribution = {
-  count = 1
-  instance_type = "Standard_F2"
+  count = 0
+  instance_type = "Standard_DS2_v2_Promo"
 }
 
 worker_distribution = {
-  count = 1
-  instance_type = "Standard_F4"
+  count = 0
+  instance_type = "Standard_DS2_v2_Promo"
 }
 
-pub_key = "~/.ssh/id_rsa.pub"
+experiment_distribution = {
+  count = 0
+  instance_type = "Standard_DS2_v2_Promo"
+}
+
+# Full path to SSH key to be copied into the node
+# e.g pub_key = "/Users/leow/.ssh/id_rsa.pub"
+pub_key = "<<Full Path to SSH Public Key>>"

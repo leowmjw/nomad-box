@@ -44,6 +44,7 @@ data "template_file" "foundation" {
   template = "${file("../templates/base.tpl")}"
 
   vars {
+    vars_bootstrap_expected = "${var.foundation_distribution.count}"
     vars_subscription_id = "${var.azure_subscription_id}"
     vars_tenant_id = "${var.azure_tenant_id}"
     vars_client_id = "${var.azure_client_id}"
