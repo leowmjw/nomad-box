@@ -57,7 +57,7 @@ CONSUL_BIND_INTERFACE="eth0"
 CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
 
 # Start up the Consul agent
-/opt/consul/consul agent -server -ui -bootstrap-expect=3 -data-dir=/tmp/consul \
+/opt/consul/consul agent -server -ui -bootstrap-expect=${vars_bootstrap_expected} -data-dir=/tmp/consul \
   -config-dir=./consul.d -bind=$${CONSUL_BIND_ADDRESS} &
 
 # Setup dnsmsq
@@ -114,7 +114,7 @@ cat > ./config.json <<EOF
 EOF
 
 # Run both as server ONLY; taking consul config from above ...
-./nomad agent -server -bootstrap-expect=3 -data-dir=/tmp/nomad -config=./config.json &
+./nomad agent -server -bootstrap-expect=${vars_bootstrap_expected} -data-dir=/tmp/nomad -config=./config.json &
 
 # Run Nomad-UI
 wget "https://github.com/jippi/hashi-ui/releases/download/v$${NOMAD_BOX_VERSION_NOMAD_UI}/hashi-ui-linux-amd64"
