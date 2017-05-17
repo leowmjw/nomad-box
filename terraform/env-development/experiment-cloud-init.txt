@@ -113,6 +113,8 @@ wget "https://github.com/jippi/hashi-ui/releases/download/v${NOMAD_BOX_VERSION_N
 chmod +x ./hashi-ui-linux-amd64
 # With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
 # ./hashi-ui-linux-amd64 &
+./hashi-ui-linux-amd64 --consul-enable --consul-address ${CONSUL_CLIENT_ADDRESS}:8500 \
+    --nomad-enable --nomad-address http://${CONSUL_CLIENT_ADDRESS}:4646 &
 
 
 # Setup Traefik (must run as root) ...
