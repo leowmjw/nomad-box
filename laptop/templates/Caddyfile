@@ -1,6 +1,6 @@
 http://fluentd.local:80, http://quote.local:80, http://nodered.local:80, http://whoami.local:80 {
 
-	proxy /  10.0.51.4:80 10.0.52.4:80 {
+	proxy /  10.0.51.4:80 {
 
 		policy least_conn
 		transparent
@@ -12,7 +12,7 @@ http://fluentd.local:80, http://quote.local:80, http://nodered.local:80, http://
 
 http://traefik.local:80 {
 
-	proxy / 10.0.51.4:8080 10.0.52.4:8080 {
+	proxy / 10.0.51.4:8080 {
 
 		policy least_conn
 		transparent
@@ -34,7 +34,7 @@ http://consul.local:80 {
 
 http://nomad.local:80 {
 
-	proxy / 10.0.1.4:3000 10.0.2.4:3000 10.0.3.4:3000 {
+	proxy / 10.0.42.4:3000 {
 
 		policy least_conn
 		transparent
