@@ -4,19 +4,11 @@
 # This should be filled in by TF template using the Makefile ENV
 NOMAD_BOX_VERSION_CONSUL=0.8.4
 NOMAD_BOX_VERSION_NOMAD=0.5.6
-NOMAD_BOX_VERSION_NOMAD_UI=0.13.6
 NOMAD_BOX_VERSION_TRAEFIK=1.3.0
-NOMAD_BOX_VERSION_VAULT=0.7.3
-NOMAD_BOX_VERSION_VAULT_UI=2.2.0
 
-# Get the basic packages (JQ + OMS + Powershell? + hasicUI + VaultUI)
-export DEBIAN_FRONTEND=noninteractive &&  apt-get update && apt-get upgrade -y && \ 
-    apt-get install -y unzip dnsmasq sysstat docker.io nodejs npm jq
-
-# Should probably get jq as well :P Now that it is packaged; go for floomatic!!
-npm install -g floomatic
-# BeakerBrowser + dat as possible alternative to pass data from laptop over into LXC/LXD nodes
-npm install -g dat
+# Get the basic packages
+export DEBIAN_FRONTEND=noninteractive &&  apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io
+# Should probably get jq as well :P
 
 # Consul operates in /opt
 # ========================
@@ -48,8 +40,8 @@ CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk
 
 # Start up the Consul agent
 /opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
-  -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
-  -bind=${CONSUL_BIND_ADDRESS} &
+  -retry-join=10.1.1.4 -retry-join=10.1.2.4 -retry-join=10.1.3.4 \
+  -bind=${CONSUL_BIND_ADDRESS} -disable-host-node-id &
 
 # Setup dnsmsq
 # From: https://github.com/darron/kvexpress-demo/blob/c0bd1733f0ad78979a34242d5cfe9961b0c3cabd/ami-build/provision.sh#L42-L56
@@ -108,16 +100,7 @@ cat > ./config.json <<EOF
 EOF
 
 # Run both as server and client; taking consul config from above ...
-./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
-
-# Run Nomad-UI
-wget "https://github.com/jippi/hashi-ui/releases/download/v${NOMAD_BOX_VERSION_NOMAD_UI}/hashi-ui-linux-amd64"
-chmod +x ./hashi-ui-linux-amd64
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
-# ./hashi-ui-linux-amd64 &
-./hashi-ui-linux-amd64 --consul-enable --consul-address ${CONSUL_CLIENT_ADDRESS}:8500 \
-    --nomad-enable --nomad-address http://${CONSUL_CLIENT_ADDRESS}:4646 &
-
+./nomad agent -client -servers=10.1.1.4,10.1.2.4,10.1.3.4 -data-dir=/tmp/nomad -config=./config.json &
 
 # Setup Traefik (must run as root) ...
 # =====================================
@@ -157,33 +140,7 @@ EOF
 # Run the traefik server; would be good to find out how to drop user permission
 ./traefik_linux-amd64 &
 
-# Download all the rest to experiment with ... (ZFS, LXD, BCC, OMS, Powershell ..)
-# Vault operates in /opt
-mkdir -p /opt/vault
-cd /opt/vault
-
-# Get the binaries
-wget "https://releases.hashicorp.com/vault/${NOMAD_BOX_VERSION_VAULT}/vault_${NOMAD_BOX_VERSION_VAULT}_linux_amd64.zip"
-unzip vault_${NOMAD_BOX_VERSION_NOMAD}_linux_amd64.zip
-
-# Get Vault-UI Source Code
-wget "https://github.com/djenriquez/vault-ui/archive/${NOMAD_BOX_VERSION_VAULT_UI}.tar.gz"
-tar xvfz ${NOMAD_BOX_VERSION_VAULT_UI}.tar.gz
-# Folder will be ./vault-ui-${NOMAD_BOX_VERSION_VAULT_UI}
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
-# ./vault-ui-linux-amd64 &
-
-# Powershell: Run a Docker container in CLI as it is interactive
-# http://discoposse.com/2017/01/19/running-powershell-core-using-docker/
-docker pull microsoft/powershell
-
-# BCC: Run a Docker container in CLI as it is interactive!!
-docker pull zlim/bcc
-# docker run -it --rm \
-#  --privileged \
-#  -v /lib/modules:/lib/modules:ro \
-#  -v /usr/src:/usr/src:ro \
-#  -v /etc/localtime:/etc/localtime:ro \
-#  --workdir /usr/share/bcc/tools \
-#  zlim/bcc
-
+# Alternative: Setup Fabio (must run as root) ...
+# ============================================
+# Fabio operates in /opt
+# mkdir -p /opt/fabio

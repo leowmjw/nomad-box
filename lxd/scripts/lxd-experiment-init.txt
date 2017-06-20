@@ -48,8 +48,8 @@ CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk
 
 # Start up the Consul agent
 /opt/consul/consul agent -data-dir=/tmp/consul -config-dir=./consul.d \
-  -retry-join=10.0.1.4 -retry-join=10.0.2.4 -retry-join=10.0.3.4 \
-  -bind=${CONSUL_BIND_ADDRESS} &
+  -retry-join=10.1.1.4 -retry-join=10.1.2.4 -retry-join=10.1.3.4 \
+  -bind=${CONSUL_BIND_ADDRESS} -disable-host-node-id &
 
 # Setup dnsmsq
 # From: https://github.com/darron/kvexpress-demo/blob/c0bd1733f0ad78979a34242d5cfe9961b0c3cabd/ami-build/provision.sh#L42-L56
@@ -108,12 +108,12 @@ cat > ./config.json <<EOF
 EOF
 
 # Run both as server and client; taking consul config from above ...
-./nomad agent -client -servers=10.0.1.4,10.0.2.4,10.0.3.4 -data-dir=/tmp/nomad -config=./config.json &
+./nomad agent -client -servers=10.1.1.4,10.1.2.4,10.1.3.4 -data-dir=/tmp/nomad -config=./config.json &
 
 # Run Nomad-UI
 wget "https://github.com/jippi/hashi-ui/releases/download/v${NOMAD_BOX_VERSION_NOMAD_UI}/hashi-ui-linux-amd64"
 chmod +x ./hashi-ui-linux-amd64
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
+# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.1.3.4:3000"
 # ./hashi-ui-linux-amd64 &
 ./hashi-ui-linux-amd64 --consul-enable --consul-address ${CONSUL_CLIENT_ADDRESS}:8500 \
     --nomad-enable --nomad-address http://${CONSUL_CLIENT_ADDRESS}:4646 &
@@ -170,7 +170,7 @@ unzip vault_${NOMAD_BOX_VERSION_NOMAD}_linux_amd64.zip
 wget "https://github.com/djenriquez/vault-ui/archive/${NOMAD_BOX_VERSION_VAULT_UI}.tar.gz"
 tar xvfz ${NOMAD_BOX_VERSION_VAULT_UI}.tar.gz
 # Folder will be ./vault-ui-${NOMAD_BOX_VERSION_VAULT_UI}
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
+# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.1.3.4:3000"
 # ./vault-ui-linux-amd64 &
 
 # Powershell: Run a Docker container in CLI as it is interactive
