@@ -85,11 +85,12 @@ EOF
 
 # Run some test actions to create nodes
 # How to copy the i,age and get it going .. with alias for zesty ..
-# Pull 16.04 and latest; have options to select ..
+# Pull 17.04 and latest; have options to select ..
+lxc image copy ubuntu-daily:17.04 local: --alias=zesty
 # Use the Ubuntu nodes so can run cloud-init??
 lxc profile create foundation
 # Need to provide the cloud-init.sh scripts ..
-lxc profile set foundation user.user-data - < /tmp/script/init.sh
+lxc profile set foundation user.user-data - < /tmp/script/lxd-foundation-init.sh
 # Exec in and confirm it is running
 lxc init zesty -p default -p foundation f1 && \
     lxc network attach fsubnet1 f1 eth0 && \
@@ -105,4 +106,8 @@ lxc init zesty -p default -p foundation f3 && \
 
 lxc start f1 && lxc start f2 && lxc start f3
 
-# Templates build from common
+# Setup Directors
+
+# Setup Workers
+
+# Setup Experimental
