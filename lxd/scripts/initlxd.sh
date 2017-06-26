@@ -5,6 +5,12 @@ set -euo pipefail
 IFS=$'\n\t'
 
 echo "Initializing LXD ..."
+# https://askubuntu.com/questions/132059/how-to-make-a-package-manager-wait-if-another-instance-of-apt-is-running
+# We have delayed 60s before trying to execut this script; hopefully enough for the main process to kickoff apt-get
+# Now loop every sec until the dpkg lock is given up
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    sleep 1
+done
 
 # LXD needs the bleeding edge; thus add as per below to get at LXD + ZFS
 export DEBIAN_FRONTEND=noninteractive && \
@@ -16,7 +22,9 @@ export DEBIAN_FRONTEND=noninteractive && \
 # sudo apt remove -y walinuxagent && sudo apt autoremove -y
 
 echo "Setting up ZFS ...."
-if [[ "x" == $AZURE_MODE ]]
+# https://stackoverflow.com/questions/307503/whats-a-concise-way-to-check-that-environment-variables-are-set-in-a-unix-shell
+# If nothing is set, defaults to empty
+if [[ "x" == ${AZURE_MODE:-} ]]
 then
     # Start Azure-specific
     # Create the block; production should likely link to Data Disk
@@ -83,6 +91,11 @@ profiles:
       type: nic
 EOF
 
+# Setup base network ..
+lxc network create fsubnet1 ipv6.address=none ipv4.address=10.1.1.1/24 ipv4.nat=true
+lxc network create fsubnet2 ipv6.address=none ipv4.address=10.1.2.1/24 ipv4.nat=true
+lxc network create fsubnet3 ipv6.address=none ipv4.address=10.1.3.1/24 ipv4.nat=true
+
 # Run some test actions to create nodes
 # How to copy the i,age and get it going .. with alias for zesty ..
 # Pull 17.04 and latest; have options to select ..
@@ -90,7 +103,7 @@ lxc image copy ubuntu-daily:17.04 local: --alias=zesty
 # Use the Ubuntu nodes so can run cloud-init??
 lxc profile create foundation
 # Need to provide the cloud-init.sh scripts ..
-lxc profile set foundation user.user-data - < /tmp/script/lxd-foundation-init.sh
+lxc profile set foundation user.user-data - < /tmp/scripts/lxd-foundation-init.sh
 # Exec in and confirm it is running
 lxc init zesty -p default -p foundation f1 && \
     lxc network attach fsubnet1 f1 eth0 && \

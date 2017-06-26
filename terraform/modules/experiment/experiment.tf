@@ -133,13 +133,17 @@ resource "azurerm_virtual_machine" "experiment_node" {
     # create the directory. Use /tmp first ..
     destination = "/tmp"
   }
-  /* Next time execute script with args ..
-   provisioner "remote-exec" {
+  provisioner "remote-exec" {
+    connection {
+      host = "${element(azurerm_network_interface.experiment_netif.*.private_ip_address, count.index)}"
+      user = "testadmin"
+      agent = "true"
+    }
     inline = [
-      "chmod +x /tmp/script.sh",
-      "/tmp/script.sh args",
+      "chmod +x /tmp/scripts/initlxd.sh",
+      "sleep 60",
+      "AZURE_MODE=x /tmp/scripts/initlxd.sh",
     ]
   }
-  */
 }
 
