@@ -124,3 +124,6 @@ lxc start f1 && lxc start f2 && lxc start f3
 # Setup Workers
 
 # Setup Experimental
+
+# Final step below is needed
+chown -R testadmin:testadmin /home/testadmin/.config
