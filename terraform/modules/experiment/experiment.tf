@@ -142,7 +142,7 @@ resource "azurerm_virtual_machine" "experiment_node" {
     inline = [
       "chmod +x /tmp/scripts/initlxd.sh",
       "sleep 60",
-      "AZURE_MODE=x /tmp/scripts/initlxd.sh",
+      "sudo AZURE_MODE=x /tmp/scripts/initlxd.sh",
     ]
   }
 }
