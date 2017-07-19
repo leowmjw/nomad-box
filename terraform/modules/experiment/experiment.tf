@@ -133,6 +133,7 @@ resource "azurerm_virtual_machine" "experiment_node" {
     # create the directory. Use /tmp first ..
     destination = "/tmp"
   }
+  /*
   provisioner "remote-exec" {
     connection {
       host = "${element(azurerm_network_interface.experiment_netif.*.private_ip_address, count.index)}"
@@ -145,5 +146,6 @@ resource "azurerm_virtual_machine" "experiment_node" {
       "sudo AZURE_MODE=x /tmp/scripts/initlxd.sh",
     ]
   }
+  */
 }
 

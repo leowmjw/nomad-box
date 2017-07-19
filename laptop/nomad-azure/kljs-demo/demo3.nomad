@@ -151,13 +151,14 @@ pm.max_spare_servers = 3
 ;---------------------
 ; Make specific Docker environment variables available to PHP
 env[APP_ENV] = "production"
-env[APP_KEY] = "base64:5ImsTupEy0ciUhsMasslYk4erjzeCV76r1Q2xZ2Hbu4="
+env[APP_KEY] = "base64:2SeYLPc2dzZMMuimSCvcKEy8uDYrypPuqQjwH/ZUDR0="
+env[JWT_SECRET] = "xigDDQiV8KjnM6foupcqtV9vwlhuKfUI"
 env[APP_DEBUG] = true
 env[APP_LOG_LEVEL] = "debug"
 env[APP_URL] = "http://quote.local"
 
 env[DB_CONNECTION] = "mysql"
-env[DB_HOST] = "data-mysql-paid.service.consul"
+env[DB_HOST] = "10.0.101.4"
 env[DB_PORT] = "3308"
 env[DB_DATABASE] = "laravel"
 env[DB_USERNAME] = "laravel"

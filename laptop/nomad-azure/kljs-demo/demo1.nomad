@@ -163,7 +163,7 @@ env[APP_URL] = "http://quote.local"
 
 env[DB_CONNECTION] = "mysql"
 env[DB_HOST] = "data-mysql.service.consul"
-env[DB_PORT] = "3307"
+env[DB_PORT] = "{{ key "free/config/DBPORT" }}"
 env[DB_DATABASE] = "laravel"
 env[DB_USERNAME] = "laravel"
 env[DB_PASSWORD] = "passw0rd"
