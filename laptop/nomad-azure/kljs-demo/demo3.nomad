@@ -158,7 +158,7 @@ env[APP_LOG_LEVEL] = "debug"
 env[APP_URL] = "http://quote.local"
 
 env[DB_CONNECTION] = "mysql"
-env[DB_HOST] = "10.0.101.4"
+env[DB_HOST] = "data-mysql-paid.service.consul"
 env[DB_PORT] = "3308"
 env[DB_DATABASE] = "laravel"
 env[DB_USERNAME] = "laravel"
@@ -452,7 +452,7 @@ listen = [::]:9000
       resources {
         memory = 1500
         network {
-          port "mysql" {
+          port "mysqlpaid" {
             static = "3308"
           }
         }
@@ -461,7 +461,7 @@ listen = [::]:9000
       service {
         name = "data-mysql-paid"
         tags = ["master"]
-        port = "mysql"
+        port = "mysqlpaid"
       }
     }
 
