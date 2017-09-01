@@ -2,9 +2,9 @@
 #
 
 # This should be filled in by TF template using the Makefile ENV
-NOMAD_BOX_VERSION_CONSUL=0.8.1
-NOMAD_BOX_VERSION_NOMAD=0.5.6
-NOMAD_BOX_VERSION_NOMAD_UI=0.13.4
+NOMAD_BOX_VERSION_CONSUL=0.9.2
+NOMAD_BOX_VERSION_NOMAD=0.6.0
+NOMAD_BOX_VERSION_NOMAD_UI=0.15.1
 
 # Get the basic packages
 export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io jq
@@ -16,12 +16,8 @@ mkdir -p /opt/consul
 cd /opt/consul
 
 # Get the binaries
-# wget "https://releases.hashicorp.com/consul/$${NOMAD_BOX_VERSION_CONSUL}/consul_$${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip"
-# unzip consul_$${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip
-
-# Get custom built consul for Retry Join Azure first until it is in master
-wget "https://gist.github.com/leowmjw/fe8344b5b8e7c0d000f18335774e7ef3/raw/95f6c08c24c0bb13f5294e532a97747b7d02adb1/linux_amd64.zip"
-unzip linux_amd64.zip
+wget "https://releases.hashicorp.com/consul/$${NOMAD_BOX_VERSION_CONSUL}/consul_$${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip"
+unzip consul_$${NOMAD_BOX_VERSION_CONSUL}_linux_amd64.zip
 
 # Setup needed folders and start service; to be replaced in systemd
 mkdir ./consul.d
@@ -40,15 +36,8 @@ EOF
 
 cat > ./consul.d/retry.json <<EOF
 {
-    "retry_join_azure": {
-                "tag_name": "type",
-                "tag_value": "Foundation",
-                "subscription_id": "${vars_subscription_id}",
-                "tenant_id": "${vars_tenant_id}",
-                "client_id": "${vars_client_id}",
-                "secret_access_key": "${vars_secret_access_key}"
-        }
-    }
+    "retry_join": ["provider=azure tag_name=type tag_value=Foundation tenant_id=${vars_tenant_id} client_id=${vars_client_id} subscription_id=${vars_subscription_id} secret_access_key=${vars_secret_access_key}"]
+
 }
 EOF
 
