@@ -1,10 +1,10 @@
 # Courtesy of: https://www.cmcrossroads.com/article/setting-makefile-variable-outside-makefile
 NOMAD_BOX_VERSION?=v0.0.1
-NOMAD_BOX_VERSION_TERRAFORM=0.9.4
-NOMAD_BOX_VERSION_CONSUL=0.8.1
-NOMAD_BOX_VERSION_NOMAD=0.5.6
-NOMAD_BOX_VERSION_NOMAD_UI=0.13.4
-NOMAD_BOX_VERSION_TRAEFIK=1.2.3
+NOMAD_BOX_VERSION_TERRAFORM=0.9.11
+NOMAD_BOX_VERSION_CONSUL=0.9.2
+NOMAD_BOX_VERSION_NOMAD=0.6.2
+NOMAD_BOX_VERSION_HASHI_UI=0.17.0
+NOMAD_BOX_VERSION_TRAEFIK=1.3.7
 NOMAD_BOX_VERSION_CADDY=v0.z.a
 NOMAD_BOX_ENV?=env-development
 NOMAD_BOX_NET?="10.0.0.0/16"
@@ -25,6 +25,11 @@ setup:
 	    curl -O "https://releases.hashicorp.com/nomad/${NOMAD_BOX_VERSION_NOMAD}/nomad_${NOMAD_BOX_VERSION_NOMAD}_darwin_amd64.zip" && \
 	    unzip nomad_${NOMAD_BOX_VERSION_NOMAD}_darwin_amd64.zip
 
+	echo "Downloading Hashi UI"
+	cd bin && touch hashi-ui-darwin-amd64 && rm hashi-ui-darwin-amd64 && \
+	    curl -L -O "https://github.com/jippi/hashi-ui/releases/download/v${NOMAD_BOX_VERSION_HASHI_UI}/hashi-ui-darwin-amd64" && \
+	    chmod +x hashi-ui-darwin-amd64
+
 	echo "Downloading Terraform ${NOMAD_BOX_VERSION_TERRAFORM}"
 	cd bin && touch terraform && rm terraform* && \
 	    curl -O "https://releases.hashicorp.com/terraform/${NOMAD_BOX_VERSION_TERRAFORM}/terraform_${NOMAD_BOX_VERSION_TERRAFORM}_darwin_amd64.zip" && \
@@ -34,6 +39,7 @@ setup:
 	cd ./terraform/${NOMAD_BOX_ENV} && time ../../bin/terraform get -update
 
 deps:
+	brew install sshuttle
 	curl -L https://aka.ms/InstallAzureCli | bash
 
 info:
