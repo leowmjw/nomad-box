@@ -2,9 +2,8 @@
 #
 
 # This should be filled in by TF template using the Makefile ENV
-NOMAD_BOX_VERSION_CONSUL=0.9.2
-NOMAD_BOX_VERSION_NOMAD=0.6.0
-NOMAD_BOX_VERSION_NOMAD_UI=0.15.1
+NOMAD_BOX_VERSION_CONSUL=0.9.3
+NOMAD_BOX_VERSION_NOMAD=0.6.2
 
 # Get the basic packages
 export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io jq
@@ -104,12 +103,3 @@ EOF
 
 # Run both as server ONLY; taking consul config from above ...
 ./nomad agent -server -bootstrap-expect=${vars_bootstrap_expected} -data-dir=/tmp/nomad -config=./config.json &
-
-# Run Nomad-UI
-wget "https://github.com/jippi/hashi-ui/releases/download/v$${NOMAD_BOX_VERSION_NOMAD_UI}/hashi-ui-linux-amd64"
-chmod +x ./hashi-ui-linux-amd64
-
-# For small A0 node; pegged CPU at 100%!!  Not where you want your quorum servers to be!
-# With IP in template; can build as ./nomad-ui-linux-amd64 -web.listen-address "10.0.3.4:3000"
-# ./hashi-ui-linux-amd64 &
-

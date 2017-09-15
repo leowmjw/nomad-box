@@ -10,3 +10,7 @@
 
 # Ignore the bin folder for now
 bin
+
+# Ignore node_modules
+node_modules
+

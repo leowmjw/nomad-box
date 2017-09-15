@@ -1,0 +1,10 @@
+http://quote.local:80 {
+
+  proxy /  acme-nomad-dev-director-node-1:80 {
+
+                policy least_conn
+                transparent
+                websocket
+
+   }
+}

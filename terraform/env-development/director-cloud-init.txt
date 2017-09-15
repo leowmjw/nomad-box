@@ -2,9 +2,9 @@
 #
 
 # This should be filled in by TF template using the Makefile ENV
-NOMAD_BOX_VERSION_CONSUL=0.9.2
-NOMAD_BOX_VERSION_NOMAD=0.6.0
-NOMAD_BOX_VERSION_TRAEFIK=1.3.7
+NOMAD_BOX_VERSION_CONSUL=0.9.3
+NOMAD_BOX_VERSION_NOMAD=0.6.2
+NOMAD_BOX_VERSION_TRAEFIK=1.3.8
 
 # Get the basic packages
 export DEBIAN_FRONTEND=noninteractive &&  apt-get update && apt-get upgrade -y && apt-get install -y unzip dnsmasq sysstat docker.io

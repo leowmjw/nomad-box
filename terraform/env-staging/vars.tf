@@ -39,15 +39,6 @@ variable "cidr_block" {
   default = "10.0.0.0/16"
 }
 
-variable "key_name" {
-  description = ""
-}
-
-variable "domain_name_servers" {
-  description = ""
-  type = "list"
-}
-
 variable "foundation_distribution" {
   description = ""
   type = "map"
